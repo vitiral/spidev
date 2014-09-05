@@ -26,6 +26,18 @@
 #include <linux/types.h>
 #include <sys/ioctl.h>
 
+
+#if PY_MAJOR_VERSION >= 3
+#define IS_PY3K
+#ifndef Py_TYPE
+    #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#endif
+#else
+#ifndef Py_TYPE
+    #define Py_TYPE(ob) ((ob)->ob_type)
+#endif
+#endif
+
 #define SPIDEV_MAXPATH 4096
 
 PyDoc_STRVAR(SpiDev_module_doc,
@@ -90,7 +102,8 @@ SpiDev_dealloc(SpiDevObject *self)
 	PyObject *ref = SpiDev_close(self);
 	Py_XDECREF(ref);
 
-	self->ob_type->tp_free((PyObject *)self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
+	/*self->ob_type->tp_free((PyObject *)self);*/
 }
 
 static char *wrmsg = "Argument must be a list of at least one, "
