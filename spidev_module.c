@@ -28,13 +28,18 @@
 
 
 #if PY_MAJOR_VERSION >= 3
-#define IS_PY3K
+
+#define IS_PY3K 1
+#define PyInt_AsLong PyLong_AsLong
+#define PyInt_Check PyLong_Check
+#define PyInt_AS_LONG PyLong_AS_LONG
 #ifndef Py_TYPE
     #define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 #endif
 #else
 #ifndef Py_TYPE
     #define Py_TYPE(ob) ((ob)->ob_type)
+    #define IS_PY3K 0
 #endif
 #endif
 
@@ -839,16 +844,50 @@ static PyMethodDef SpiDev_module_methods[] = {
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
+
+#if IS_PY3K
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "spidev",     /* m_name */
+    "Module for interfacing with Raspi SPI",  /* m_doc */
+    -1,                  /* m_size */
+    SpiDev_methods,      /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
+#endif
+
 PyMODINIT_FUNC
-initspidev(void)
+#if IS_PY3K
+    PyInit_spidev(void)
+#else
+    initspidev(void)
+#endif
 {
 	PyObject* m;
 
 	if (PyType_Ready(&SpiDevObjectType) < 0)
+#if IS_PY3K
+        return NULL;
+    m = PyModule_Create(&moduledef);
+#else
 		return;
-
 	m = Py_InitModule3("spidev", SpiDev_module_methods, SpiDev_module_doc);
+#endif
 	Py_INCREF(&SpiDevObjectType);
-	PyModule_AddObject(m, "SpiDev", (PyObject *)&SpiDevObjectType);
+
+#if IS_PY3K
+    if(
+#endif
+	PyModule_AddObject(m, "SpiDev", (PyObject *)&SpiDevObjectType)
+#if IS_PY3K
+    ) return NULL;
+    return m;
+#else
+    ;
+    return;
+#endif
 }
 
