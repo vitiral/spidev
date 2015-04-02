@@ -1,4 +1,4 @@
-# spidev -- interface with linux dev/spi drivers
+# spidev -- python3 interface with linux dev/spi drivers
 
 ## Installation
 ```
