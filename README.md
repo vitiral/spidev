@@ -2,8 +2,8 @@
 
 ## Installation
 ```
-sudo apt-get install python-dev  # or python3-dev for python3
-pip install spidev
+sudo apt-get install python3-dev
+pip install https://github.com/cloudformdesign/spidev/archive/master.zip
 ```
 
 
